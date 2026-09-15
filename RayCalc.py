@@ -51,7 +51,9 @@ for pair in StaEvtPair:
 #             depth.append(neg_dep)
 #         print('-----------------------------')
 for pt in grid:
-    ax.scatter(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2],s=.5,alpha=.5)
+    if pt.loc._cart[0]> min(cart_x) and pt.loc._cart[0]< max(cart_x):
+        if pt.loc._cart[1]> min(cart_y) and pt.loc._cart[1]< max(cart_y):
+            ax.scatter(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2],s=.5,alpha=.5)
 # #ax.plot(lat,lon,depth,label='raypath')
 ax.plot(cart_x,cart_y,cart_z)
 plt.savefig(f'ray.png', dpi=900, bbox_inches='tight', pad_inches=0.1)
