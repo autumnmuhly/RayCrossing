@@ -61,19 +61,20 @@ for i in range(len(cart_x)):
         print(i)
         ptA=(cart_x[i],cart_y[i],cart_z[i])
         ptB=(cart_x[i+1],cart_y[i+1],cart_z[i+1])
-        if ptA == ptB:
-            break
-#         for pt in grid_cmb:
-#             point=(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
-#             dist=CalcDist(point,ptA,ptB)
-#             pt.dist2Ray=dist
-#             #print(f'this is the distance between the points {dist}')
-#             # if dist is float('nan'):
-#             #      print(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
-#             #      print(ptA,ptB)
-#             distances.append(dist)
-
-
+        if ptA != ptB:
+            for pt in grid_cmb:
+                point=(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
+                dist=CalcDist(point,ptA,ptB)
+                pt.dist2Ray=dist
+                #print(f'this is the distance between the points {dist}')
+                # if dist is float('nan'):
+                #      print(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
+                #      print(ptA,ptB)
+                distances.append(dist)
+min=5000
+for pt in grid_cmb:
+    if pt.dist2Ray < min:
+        min=pt.dist2Ray
 print('--------')
 print(min(distances))
 print(max(distances))
