@@ -58,10 +58,9 @@ def CalcDist(p,a,b):
     a=np.array(a)
     b=np.array(b)
     d = np.divide(b - a, np.linalg.norm(b - a))
-    print(f'this is the value of d {d}')
+    #print(f'this is the value of d {d}')
     s = np.dot(a - p, d)
     t = np.dot(p - b, d)
     h = np.maximum.reduce([s, t, 0])
     c = np.cross(p - a, d)
     return np.hypot(h, np.linalg.norm(c))
-

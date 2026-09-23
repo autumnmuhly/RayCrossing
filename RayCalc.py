@@ -1,6 +1,7 @@
 import taup
 from heatmap import create_gridpoint,EQ,Station,read_stations_adept,read_earthquakes_adept,latlon_cartesian
 from StaEvtGrid import PhArrEvt,greatcircle,CalcDist
+from PointSegment import PtSegCheck
 import matplotlib.pyplot as plt 
 import sys
 
@@ -8,7 +9,7 @@ import sys
 stations = read_stations_adept('station.txt')
 evts = read_earthquakes_adept('evt.txt')
 phase = 'SKKS'
-numberPoints = 1000
+numberPoints = 40000
 plot3D='N'
 plot2D='N'
 #---------------------------
@@ -18,8 +19,6 @@ for evt in evts:
         StaEvtPair.append(PhArrEvt(sta,evt))
 
 for pair in StaEvtPair:
-    print(pair.evt)
-    print(pair.evt.depth)
     pair.get_raypath(phase)
 
 
@@ -39,14 +38,7 @@ cart_y=[]
 cart_z=[]
 for pair in StaEvtPair:
     for seg in pair.path:
-        print('-----------------------------')
-        print(seg.name)
-        print(seg.segment[0])
-        print(seg.segment[0].lat)
-        print(seg.segment[-1])
         for s in seg.segment:
-            #print(s.lat)
-            #ax.scatter(s.lat,s.lon,(s.depth*-1),label='raypath',s=2)
             lat.append(s.lat)
             lon.append(s.lon)
             depth.append(s.depth)
@@ -54,31 +46,24 @@ for pair in StaEvtPair:
             cart_x.append(carts.x)
             cart_y.append(carts.y)
             cart_z.append(s.depth)
-distances=[]
 
-for i in range(len(cart_x)):
-    if cart_z[i] >=2880:
-        print(i)
-        ptA=(cart_x[i],cart_y[i],cart_z[i])
-        ptB=(cart_x[i+1],cart_y[i+1],cart_z[i+1])
-        if ptA != ptB:
-            for pt in grid_cmb:
-                point=(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
-                dist=CalcDist(point,ptA,ptB)
-                pt.dist2Ray=dist
-                #print(f'this is the distance between the points {dist}')
-                # if dist is float('nan'):
-                #      print(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2])
-                #      print(ptA,ptB)
-                distances.append(dist)
-min=5000
+
+segments=PtSegCheck(cart_x,cart_y,cart_z,grid_cmb)
+
+
 for pt in grid_cmb:
-    if pt.dist2Ray < min:
-        min=pt.dist2Ray
-print('--------')
-print(min(distances))
-print(max(distances))
+    pt.count=0
 
+for seg in segments:
+     for pt in grid_cmb:
+        for pt_seg in seg.points_list:
+            if pt_seg == pt:
+                #print(f'adding one {pt}')
+                pt.count=1
+print('-----------')
+for pt in grid_cmb:
+    if pt.count == 1:
+        print(pt)
 
 
 
