@@ -26,8 +26,6 @@ staEvtPair=calc_staEvtPair
 print('constructing grid')
 grid=create_gridpoint(numberPoints)
 grid_cmb=create_gridpoint(numberPoints,2891)
-# for pt in grid_cmb:
-#     countGrid={pt,0}
 points_list=[]
 
 for pt in grid_cmb:
@@ -35,15 +33,15 @@ for pt in grid_cmb:
 print(staEvtPair)
 for pair in staEvtPair:
     print(pair.phase,pair.arr.loc, pair.pierce)
-    # for p in pair.pierce:
-    #     closest_point=ptPierceCheck(p.lat,p.lon,p.depth,grid_cmb)
-    #     for pt in grid_cmb:
-    #          if closest_point==pt:
-    #             print('-------')
-    #             print(pair.arr.loc)
-    #             print(pair.evt.time)
-    #             print(pt.loc)
-    #             pt.count+=1
+    for p in pair.pierce:
+        closest_point=ptPierceCheck(p.lat,p.lon,p.depth,grid_cmb)
+        for pt in grid_cmb:
+             if closest_point==pt:
+                print('-------')
+                print(pair.arr.loc)
+                print(pair.evt.time)
+                print(pt.loc)
+                pt.count+=1
 
 
 for pt in grid_cmb:
