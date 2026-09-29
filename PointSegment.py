@@ -8,7 +8,6 @@ class LineSegment:
 
 def ptPierceCheck(lat1,lon1,depth1,grid):
     cart1=latlon_cartesian(lat1,lon1,depth1)
-    #cart=zip(x,y,z)
     closet_point=None
     closest_distance=10000
     for pt in grid:

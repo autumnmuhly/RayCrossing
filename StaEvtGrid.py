@@ -10,30 +10,39 @@ class PhArrEvt:
     def __init__(self,arr,evt):
         self.arr = arr
         self.evt = evt
-    def get_pierce(self,phase):
-        evtlatlon=([[self.evt.loc.lat,self.evt.loc.lon]])
-        staLatLons=(self.arr.loc.lat,self.arr.loc.lon)
-        pierce=[]
-        with taup.TauPServer(verbose=True) as taupserver:
-            params = taup.PierceQuery()
-            params.phase([phase])
-            params.model('prem')
-            params.geodetic(True)
+def get_pierce(phArrEvt,phase,arctype='minor'):
+    with taup.TauPServer(verbose=True) as taupserver:
+        params = taup.PierceQuery()
+        params.phase([phase])
+        params.model('prem')
+        params.geodetic(True)
+        for pae in phArrEvt:
+            pierce=[]
+            pae.phase=phase
+            evtlatlon=([[pae.evt.loc.lat,pae.evt.loc.lon]])
+            #staLatLons=([pae.arr.loc.lat,pae.arr.loc.lon])
             params.event( *evtlatlon[0] )
-            params.sourcedepth(self.evt.depth)
-            params.station(staLatLons[0],staLatLons[1])
+            params.sourcedepth(pae.evt.depth)
+            params.station(pae.arr.loc.lat,pae.arr.loc.lon)
             pierceResult = params.calc(taupserver)
             print('--------')
             print(pierceResult)
             #print(pathResult.arrivals)
             for a in pierceResult.arrivals:
-                for td in a.pierce:
-                    if td.depth == 2891:
-                        pierce.append(td)
-            self.pierce=pierce
-                # if a.puristdist >=180 and a.puristdist<=360:
-                #     print('this is major arc')
-        return
+                if arctype == 'major':
+                    if a.puristdist >=180 and a.puristdist<=360:
+                        for td in a.pierce:
+                            if td.depth == 2891:
+                                pierce.append(td)
+                if arctype == 'minor':
+                    if a.puristdist <=180:
+                        for td in a.pierce:
+                            if td.depth == 2891:
+                                print(td)
+                                pierce.append(td)
+            pae.pierce=pierce
+            #print(pierce)
+    return phArrEvt
 
 def greatcircle(pt1,pt2):
     points=[]
