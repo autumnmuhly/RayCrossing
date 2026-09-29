@@ -2,36 +2,37 @@ import taup
 from pyproj import Geod
 from heatmap import Location
 import numpy as np
+import math
+
 
 class PhArrEvt:
-    "ArrEvt pairs with phase specific resid and differential measurements"
+    "Phase Array Event pairs"
     def __init__(self,arr,evt):
         self.arr = arr
         self.evt = evt
-    def get_raypath(self,phase):
+    def get_pierce(self,phase):
         evtlatlon=([[self.evt.loc.lat,self.evt.loc.lon]])
         staLatLons=(self.arr.loc.lat,self.arr.loc.lon)
+        pierce=[]
         with taup.TauPServer(verbose=True) as taupserver:
-            params = taup.PathQuery()
+            params = taup.PierceQuery()
             params.phase([phase])
             params.model('prem')
             params.geodetic(True)
             params.event( *evtlatlon[0] )
             params.sourcedepth(self.evt.depth)
             params.station(staLatLons[0],staLatLons[1])
-            pathResult = params.calc(taupserver)
-            for a in pathResult.arrivals:
-                #print(f"{a.phase}   {a.sourcedepth} {a.distdeg} {a.time}  {a.desc if a.desc is not None else ''}")
-                #print(a.pathSegments)
-                self.path = a.pathSegments
-                # if a.pathlength is not None:
-                #     print(f"  Path length: {a.pathlength} km")
-                # else:
-                #     print("  No Path")
-                for pathseg in a.pathSegments:
-                    firstPoint = pathseg.segment[0]
-                    lastPoint = pathseg.segment[-1]
-                    #print(f"    {pathseg.name} as {pathseg.wavetype} from {firstPoint.depth} km at {firstPoint.distdeg} deg to {lastPoint.depth} km at {lastPoint.distdeg} deg takes {lastPoint.time-firstPoint.time} sec")
+            pierceResult = params.calc(taupserver)
+            print('--------')
+            print(pierceResult)
+            #print(pathResult.arrivals)
+            for a in pierceResult.arrivals:
+                for td in a.pierce:
+                    if td.depth == 2891:
+                        pierce.append(td)
+            self.pierce=pierce
+                # if a.puristdist >=180 and a.puristdist<=360:
+                #     print('this is major arc')
         return
 
 def greatcircle(pt1,pt2):
@@ -48,7 +49,7 @@ def greatcircle(pt1,pt2):
 
 
 
-def CalcDist(p,a,b):
+def calcDistSeg(p,a,b):
     "calc distance between point and line segment"
     #https://stackoverflow.com/questions/56463412/distance-from-a-point-to-a-line-segment-in-3d-python
     # print(p)
@@ -64,3 +65,10 @@ def CalcDist(p,a,b):
     h = np.maximum.reduce([s, t, 0])
     c = np.cross(p - a, d)
     return np.hypot(h, np.linalg.norm(c))
+
+def calcDistPt(p1,p2):
+    dx=(p2[0]-p1.x)**2
+    dy=(p2[1]-p1.y)**2
+    dz=(p2[2]-p1.z)**2
+    d=math.sqrt(dx+dy+dz)
+    return d

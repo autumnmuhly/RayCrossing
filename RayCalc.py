@@ -1,7 +1,7 @@
 import taup
-from heatmap import create_gridpoint,EQ,Station,read_stations_adept,read_earthquakes_adept,latlon_cartesian
-from StaEvtGrid import PhArrEvt,greatcircle,CalcDist
-from PointSegment import PtSegCheck
+from heatmap import create_gridpoint,EQ,Station,read_stations_adept,read_earthquakes_adept
+from StaEvtGrid import PhArrEvt,greatcircle
+from PointSegment import ptPierceCheck
 import matplotlib.pyplot as plt 
 import sys
 
@@ -13,62 +13,47 @@ numberPoints = 40000
 plot3D='N'
 plot2D='N'
 #---------------------------
-StaEvtPair = []
+staEvtPair = []
 for evt in evts:
     for sta in stations:
-        StaEvtPair.append(PhArrEvt(sta,evt))
+        staEvtPair.append(PhArrEvt(sta,evt))
 
-for pair in StaEvtPair:
-    pair.get_raypath(phase)
+for pair in staEvtPair:
+    print('getting pierce point')
+    pair.get_pierce(phase)
 
+for pair in staEvtPair:
+    print('alrady have pierce point')
+    print(pair.pierce)
 
+print('constructing grid')
 grid=create_gridpoint(numberPoints)
 grid_cmb=create_gridpoint(numberPoints,2891)
+# for pt in grid_cmb:
+#     countGrid={pt,0}
+points_list=[]
 
-for evt in evts:
-    for sta in stations:
-        gcPoints=greatcircle(evt,sta)
+for pt in grid_cmb:
+     pt.count=0
 
-
-lat=[]
-lon=[]
-depth=[]
-cart_x=[]
-cart_y=[]
-cart_z=[]
-for pair in StaEvtPair:
-    for seg in pair.path:
-        for s in seg.segment:
-            lat.append(s.lat)
-            lon.append(s.lon)
-            depth.append(s.depth)
-            carts=latlon_cartesian(s.lat,s.lon)
-            cart_x.append(carts.x)
-            cart_y.append(carts.y)
-            cart_z.append(s.depth)
-
-
-segments=PtSegCheck(cart_x,cart_y,cart_z,grid_cmb)
+for pair in staEvtPair:
+    for p in pair.pierce:
+        closest_point=ptPierceCheck(p.lat,p.lon,p.depth,grid_cmb)
+        for pt in grid_cmb:
+             if closest_point==pt:
+                  pt.count+=1
 
 
 for pt in grid_cmb:
-    pt.count=0
-
-for seg in segments:
-     for pt in grid_cmb:
-        for pt_seg in seg.points_list:
-            if pt_seg == pt:
-                #print(f'adding one {pt}')
-                pt.count=1
-print('-----------')
-for pt in grid_cmb:
-    if pt.count == 1:
-        print(pt)
+    if pt.count>=1:
+        print(f' this is the count {pt.count} for this point loc {pt.loc}')
 
 
 
 
-if plot3D is 'Y':
+
+
+if plot3D == 'Y':
     fig = plt.figure()
     ax = plt.figure().add_subplot(111,projection='3d')
     for pt in grid:
@@ -84,7 +69,7 @@ if plot3D is 'Y':
     ax.invert_yaxis()
     plt.show()
     #plt.savefig(f'ray.png', dpi=900, bbox_inches='tight', pad_inches=0.1)
-if plot2D is 'Y':
+if plot2D == 'Y':
     fix,ax=plt.subplots()
     ax.plot(lon,depth)
     for pt in grid:
