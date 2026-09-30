@@ -4,14 +4,15 @@ from StaEvtGrid import PhArrEvt,greatcircle,get_pierce
 from PointSegment import ptPierceCheck
 import matplotlib.pyplot as plt 
 import sys
+from datetime import datetime
+import jsonpickle
 
-
+start = datetime.now()
 stations = read_stations_adept('station.txt')
 evts = read_earthquakes_adept('evt.txt')
-phase = ['SKKS','SKKKS']
+#phase = ['SKKS','SKKKS']
+phase = ['SKKS','SKKKS','ScS']
 numberPoints = 40000
-plot3D='N'
-plot2D='N'
 #---------------------------
 staEvtPair = []
 for evt in evts:
@@ -43,43 +44,18 @@ for pair in staEvtPair:
                 print(pt.loc)
                 pt.count+=1
 
-
+count_value=[]
 for pt in grid_cmb:
     if pt.count>=1:
         print(f' this is the count {pt.count} for this point loc {pt.loc}')
 
+mydata={"grid_cmb":grid_cmb,
+        "phase_list": phase,
+        "staEvtPair":staEvtPair
+        }
+with open('testing.json', "w") as outf:
+        outf.write(jsonpickle.encode(mydata))
 
 
-
-
-
-if plot3D == 'Y':
-    fig = plt.figure()
-    ax = plt.figure().add_subplot(111,projection='3d')
-    for pt in grid:
-        # if pt.loc._cart[0]> min(cart_x) and pt.loc._cart[0]< max(cart_x):
-        #     if pt.loc._cart[1]> min(cart_y) and pt.loc._cart[1]< max(cart_y):
-                ax.scatter(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2],s=.5,alpha=.5)
-    for pt in grid_cmb:
-        # if pt.loc._cart[0]> min(cart_x) and pt.loc._cart[0]< max(cart_x):
-        #     if pt.loc._cart[1]> min(cart_y) and pt.loc._cart[1]< max(cart_y):
-                ax.scatter(pt.loc._cart[0],pt.loc._cart[1],pt.loc._cart[2],s=.5,alpha=.5,c='green')
-    # #ax.plot(lat,lon,depth,label='raypath')
-    ax.plot(cart_x,cart_y,cart_z)
-    ax.invert_yaxis()
-    plt.show()
-    #plt.savefig(f'ray.png', dpi=900, bbox_inches='tight', pad_inches=0.1)
-if plot2D == 'Y':
-    fix,ax=plt.subplots()
-    ax.plot(lon,depth)
-    for pt in grid:
-        if pt.loc.lon> min(lon) and pt.loc.lon< max(lon):
-            plt.scatter(pt.loc.lon,0,c='blue')
-    for pt in grid_cmb:
-        if pt.loc.lon> min(lon) and pt.loc.lon< max(lon):
-            plt.scatter(pt.loc.lon,2891,c='green')
-    ax.set_xlabel("Latitude")
-    ax.set_ylabel("Depth (km)")
-    ax.invert_yaxis()
-    plt.show()
-
+end=datetime.now()
+print(start,end)
